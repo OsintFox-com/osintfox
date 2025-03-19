@@ -1,37 +1,38 @@
 import { safeFetch } from '../utils/safeFetch.js';
 
-const WHOISXML_API_KEY = process.env.WHOISXML_API_KEY;
+const API_KEY = process.env.WHOISXML_API_KEY;
 
-async function whoisApiRequest(baseUrl, params = {}) {
-  const urlParams = new URLSearchParams({ apiKey: WHOISXML_API_KEY, ...params });
-  const url = `${baseUrl}?${urlParams}`;
-  return await safeFetch(url);
-}
+const whoisApiRequest = async (url, options = {}) => {
+  return safeFetch(url, options);
+};
 
-export const getDnsLookup = (domainName) =>
-  whoisApiRequest('https://www.whoisxmlapi.com/api/v1', { domainName });
-
-export const getDnsHistory = (domainName) =>
-  whoisApiRequest('https://whois-history.whoisxmlapi.com/api/v1', { domainName, mode: 'purchase' });
-
-export const getIPGeolocation = (ipAddress) =>
-  whoisApiRequest('https://ip-geolocation.whoisxmlapi.com/api/v1', { ipAddress });
+export const getIPGeolocation = (ip) =>
+  whoisApiRequest(`https://ip-geolocation.whoisxmlapi.com/api/v1?apiKey=${API_KEY}&ipAddress=${ip}`);
 
 export const reverseIPLookup = (ip) =>
-  whoisApiRequest('https://reverse-ip.whoisxmlapi.com/api/v1', { ip });
+  whoisApiRequest(`https://reverse-ip.whoisxmlapi.com/api/v1?apiKey=${API_KEY}&ip=${ip}`);
+
+export const getDnsLookup = (domain) =>
+  whoisApiRequest(`https://www.whoisxmlapi.com/whoisserver/DNSService?apiKey=${API_KEY}&domainName=${domain}`);
+
+export const getDnsHistory = (domain) =>
+  whoisApiRequest(`https://whois-history.whoisxmlapi.com/api/v1?apiKey=${API_KEY}&domainName=${domain}`);
 
 export const getSubdomains = (domain) =>
-  whoisApiRequest('https://domains-subdomains-discovery.whoisxmlapi.com/api/v1', { domainName: domain });
-
-export const reverseWhoisLookup = (searchTerm, mode = 'purchase') =>
-  whoisApiRequest('https://reverse-whois.whoisxmlapi.com/api/v2', {
-    searchType: 'current',
-    basicSearchTerms: JSON.stringify({ include: [searchTerm] }),
-    mode,
+  whoisApiRequest('https://domains-subdomains-discovery.whoisxmlapi.com/api/v1', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      apiKey: API_KEY,
+      subdomains: { include: [domain] },
+    }),
   });
 
-export const getWhoisHistory = (domainName) =>
-  whoisApiRequest('https://whois-history.whoisxmlapi.com/api/v1', { domainName, mode: 'purchase' });
+export const getWhoisHistory = (domain) =>
+  whoisApiRequest(`https://whois-history.whoisxmlapi.com/api/v1?apiKey=${API_KEY}&domainName=${domain}`);
 
-export const verifyEmail = (emailAddress) =>
-  whoisApiRequest('https://emailverification.whoisxmlapi.com/api/v3', { emailAddress });
+export const verifyEmail = (email) =>
+  whoisApiRequest(`https://emailverification.whoisxmlapi.com/api/v2?apiKey=${API_KEY}&emailAddress=${email}`);
+
+export const reverseWhoisLookup = (query) =>
+  whoisApiRequest(`https://reverse-whois.whoisxmlapi.com/api/v2?apiKey=${API_KEY}&basicSearchTerms.include=${query}&mode=purchase`);
